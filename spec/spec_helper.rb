@@ -16,4 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with PubMedApps.  If not, see <http://www.gnu.org/licenses/>.
 
+require 'coveralls'
+Coveralls.wear!
+
 require 'pub_med_apps'
