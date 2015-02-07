@@ -1,8 +1,6 @@
 # PubMedApps #
 
-[![Build Status](https://travis-ci.org/mooreryan/PubMedApps.svg?branch=master)](https://travis-ci.org/mooreryan/PubMedApps)
-
-[![Coverage Status](https://coveralls.io/repos/mooreryan/PubMedApps/badge.svg?branch=master)](https://coveralls.io/r/mooreryan/PubMedApps?branch=master)
+[![Build Status](https://travis-ci.org/mooreryan/PubMedApps.svg?branch=master)](https://travis-ci.org/mooreryan/PubMedApps) [![Coverage Status](https://coveralls.io/repos/mooreryan/PubMedApps/badge.svg?branch=master)](https://coveralls.io/r/mooreryan/PubMedApps?branch=master)
 
 Library code for the Snazziest PubMed apps.
 
