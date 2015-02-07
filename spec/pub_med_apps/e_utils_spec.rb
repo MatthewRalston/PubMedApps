@@ -23,6 +23,10 @@ module PubMedApps
   describe EUtils do
 
     let(:pmid) { '25313075' }
+    let(:pmids) do
+      ["23391036", "25002514", "235528", "24809024", "20858168"]
+    end
+    
     describe "#new" do
       it "returns a new EUtils object" do
         expect(EUtils.new).to be_a EUtils
@@ -43,9 +47,8 @@ module PubMedApps
 
     describe "::related_citations" do
       it "returns a set with related citations" do
-        # eutils = double('EUtils')
         allow(EUtils).to receive_messages(elink: SpecConstants::FAKE_XML)
-        expect(EUtils.related_citations(pmid)).to eq SpecConstants::PMIDS
+        expect(EUtils.related_citations(pmid)).to eq pmids
       end
     end
   end

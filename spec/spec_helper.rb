@@ -24,9 +24,7 @@ require 'nokogiri'
 
 module SpecConstants
 
-  PMIDS = ["23391036", "25002514", "235528", "24809024", "20858168"]
-  
-FAKE_XML =
+  FAKE_XML =
     Nokogiri::XML '<?xml version="1.0"?>
 <!DOCTYPE eLinkResult PUBLIC "-//NLM//DTD eLinkResult, 23 November 2010//EN" "http://www.ncbi.nlm.nih.gov/entrez/query/DTD/eLink_101123.dtd">
 <eLinkResult>
