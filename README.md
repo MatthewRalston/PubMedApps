@@ -1,8 +1,12 @@
-# PubMedApps
+# PubMedApps #
 
-TODO: Write a gem description
+[![Build Status](https://travis-ci.org/mooreryan/PubMedApps.svg?branch=master)](https://travis-ci.org/mooreryan/PubMedApps)
 
-## Installation
+[![Coverage Status](https://coveralls.io/repos/mooreryan/PubMedApps/badge.svg?branch=master)](https://coveralls.io/r/mooreryan/PubMedApps?branch=master)
+
+Library code for the Snazziest PubMed apps.
+
+## Installation ##
 
 Add this line to your application's Gemfile:
 
@@ -18,11 +22,11 @@ Or install it yourself as:
 
     $ gem install pub_med_apps
 
-## Usage
+## Usage ##
 
 TODO: Write usage instructions here
 
-## Contributing
+## Contributing ##
 
 1. Fork it ( https://github.com/[my-github-username]/pub_med_apps/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
