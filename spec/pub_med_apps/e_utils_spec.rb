@@ -16,6 +16,22 @@
 # You should have received a copy of the GNU General Public License
 # along with PubMedApps.  If not, see <http://www.gnu.org/licenses/>.
 
-class EFetch
-end
+require 'spec_helper'
 
+module PubMedApps
+  describe EUtils do
+
+    let(:pmid) { '25313075' }
+    describe "#new" do
+      it "returns a new EUtils object" do
+        expect(EUtils.new).to be_a EUtils
+      end
+    end
+
+    # describe "#related_citations" do
+    #   it "takes a PMID and returns an xml object" do
+    #     expect(EUtils.related_citations(pmid)).to be_an_instance_of Nokogiri::XML
+    #   end
+    # end
+  end
+end

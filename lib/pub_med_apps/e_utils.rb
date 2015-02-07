@@ -16,16 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with PubMedApps.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'spec_helper'
-
 module PubMedApps
-  module EUtils
-    describe EFetch do
-      describe "#new" do
-        it "returns a new EFetch object" do
-          expect(EFetch.new).to be_a EFetch
-        end
-      end
-    end
+  class EUtils
+    # def self.related_citations pmid
+    #   Nokogiri::XML elink pmid
+    # end 
   end
 end
