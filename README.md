@@ -4,26 +4,6 @@
 
 Library code for the Snazziest PubMed apps.
 
-## Installation ##
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'pub_med_apps'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install pub_med_apps
-
-## Usage ##
-
-TODO: Write usage instructions here
-
 ## Contributing ##
 
 1. Fork it ( https://github.com/[my-github-username]/pub_med_apps/fork )
