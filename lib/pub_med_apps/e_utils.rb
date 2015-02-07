@@ -19,7 +19,16 @@
 require 'open-uri'
 
 module PubMedApps
+
+  # Provides methods for getting related pubmed citations.
   class EUtils
+
+    # Return an array of PMIDs related to the given PMID
+    #
+    # @param pmid [String] the PMID of article to get related
+    #   citations
+    #
+    # @return [Array<String>] an array of string PMIDs
     def self.related_citations pmid
       xml_doc = EUtils.elink pmid
       xml_doc.css('LinkSetDb Id').map { |elem| elem.text }.uniq
@@ -29,10 +38,10 @@ module PubMedApps
     # PMID
     #
     # @param pmid [String] the PMID of article to get related
-    # citations
+    #   citations
     # 
-    # @return [Nokogiri::XML::Document] A Nokogiri::XML::Document with
-    # the related citations to the given PMID
+    # @return [Nokogiri::XML::Document] a Nokogiri::XML::Document with
+    #   the related citations to the given PMID
     def self.elink pmid
       unless pmid.match /[0-9]+/
         err_msg = "#{pmid} is not a proper PMID"
