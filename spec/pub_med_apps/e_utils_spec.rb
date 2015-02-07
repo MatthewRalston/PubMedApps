@@ -17,6 +17,7 @@
 # along with PubMedApps.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'spec_helper'
+require 'nokogiri'
 
 module PubMedApps
   describe EUtils do
@@ -28,10 +29,24 @@ module PubMedApps
       end
     end
 
-    # describe "#related_citations" do
-    #   it "takes a PMID and returns an xml object" do
-    #     expect(EUtils.related_citations(pmid)).to be_an_instance_of Nokogiri::XML
-    #   end
-    # end
+    describe "::elink" do
+      it "takes a PMID and returns an xml object" do
+        expect(EUtils.elink(pmid)).to be_an_instance_of Nokogiri::XML::Document
+      end
+
+      it "raises an ArgumentError if not passed a PMID (integer)" do
+        arg = 'fahehe'
+        err_msg = "#{arg} is not a proper PMID"
+        expect { EUtils.elink(arg) }.to raise_error(ArgumentError, err_msg)
+      end
+    end
+
+    describe "::related_citations" do
+      it "returns a set with related citations" do
+        # eutils = double('EUtils')
+        allow(EUtils).to receive_messages(elink: SpecConstants::FAKE_XML)
+        expect(EUtils.related_citations(pmid)).to eq SpecConstants::PMIDS
+      end
+    end
   end
 end
