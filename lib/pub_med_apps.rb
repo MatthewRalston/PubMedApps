@@ -17,7 +17,7 @@
 # along with PubMedApps.  If not, see <http://www.gnu.org/licenses/>.
 
 require "pub_med_apps/version"
-require "pub_med_apps/e_utils"
+require "pub_med_apps/pmid"
 
 module PubMedApps
   # Your code goes here...

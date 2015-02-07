@@ -21,7 +21,7 @@ require 'open-uri'
 module PubMedApps
 
   # Provides methods for getting related pubmed citations.
-  class EUtils
+  class Pmid
 
     # Return an array of PMIDs related to the given PMID
     #
@@ -30,7 +30,7 @@ module PubMedApps
     #
     # @return [Array<String>] an array of string PMIDs
     def self.related_citations pmid
-      xml_doc = EUtils.elink pmid
+      xml_doc = Pmid.elink pmid
       xml_doc.css('LinkSetDb Id').map { |elem| elem.text }.uniq
     end
 

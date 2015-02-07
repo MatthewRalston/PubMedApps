@@ -110,10 +110,6 @@ module SpecConstants
 </eLinkResult>
 '
 
-  def self.PMIDS
-    PMIDS
-  end
-
   def self.FAKE_XML
     FAKE_XML
   end

@@ -20,7 +20,7 @@ require 'spec_helper'
 require 'nokogiri'
 
 module PubMedApps
-  describe EUtils do
+  describe Pmid do
 
     let(:pmid) { '25313075' }
     let(:pmids) do
@@ -28,27 +28,27 @@ module PubMedApps
     end
     
     describe "#new" do
-      it "returns a new EUtils object" do
-        expect(EUtils.new).to be_a EUtils
+      it "returns a new Pmid object" do
+        expect(Pmid.new).to be_a Pmid
       end
     end
 
     describe "::elink" do
       it "takes a PMID and returns an xml object" do
-        expect(EUtils.elink(pmid)).to be_an_instance_of Nokogiri::XML::Document
+        expect(Pmid.elink(pmid)).to be_an_instance_of Nokogiri::XML::Document
       end
 
       it "raises an ArgumentError if not passed a PMID (integer)" do
         arg = 'fahehe'
         err_msg = "#{arg} is not a proper PMID"
-        expect { EUtils.elink(arg) }.to raise_error(ArgumentError, err_msg)
+        expect { Pmid.elink(arg) }.to raise_error(ArgumentError, err_msg)
       end
     end
 
     describe "::related_citations" do
       it "returns a set with related citations" do
-        allow(EUtils).to receive_messages(elink: SpecConstants::FAKE_XML)
-        expect(EUtils.related_citations(pmid)).to eq pmids
+        allow(Pmid).to receive_messages(elink: SpecConstants::FAKE_XML)
+        expect(Pmid.related_citations(pmid)).to eq pmids
       end
     end
   end
