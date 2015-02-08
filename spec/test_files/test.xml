@@ -12,12 +12,16 @@
 			<LinkName>pubmed_pubmed</LinkName>
 			
 				<Link>
-				<Id>23391036</Id>
+				<Id>17284678</Id>
 				<Score>46386839</Score>
 			</Link>
 				<Link>
 				<Id>15</Id>
-				<Score>46086339</Score>
+				<Score>36386839</Score>
+			</Link>
+				<Link>
+				<Id>23391036</Id>
+				<Score>26086339</Score>
 			</Link>
 			
 		</LinkSetDb>
