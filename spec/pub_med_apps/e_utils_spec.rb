@@ -24,9 +24,10 @@ module PubMedApps
   describe EUtils do
 
     let(:efetch_doc) do
-      id1 = '17284678'
-      id2 = '9997'
-      doc = EUtils.fetch(id1, id2)
+      id1 = '17284678' # this one has simple abstract
+      id2 = '15' # this one has no abstract
+      id3 = '23391036' # this one has different abstract format
+      doc = EUtils.fetch(id1, id2, id3)
     end
     
     describe "::elink" do
@@ -67,28 +68,32 @@ module PubMedApps
 
     describe "::get_pmids" do
       it "gets pmids from the EUtils.fetch result" do
-        pmids = %w[17284678 9997]
+        pmids = %w[17284678 15 23391036]
         expect(EUtils.get_pmids efetch_doc).to eq pmids
       end
     end
 
     describe "::get_titles" do
       it "gets titles from the EUtils.fetch result" do
-        titles = [SpecConst::TITLE_1, SpecConst::TITLE_2]
+        titles = [SpecConst::TITLE_1,
+                  SpecConst::TITLE_2,
+                  SpecConst::TITLE_3]
         expect(EUtils.get_titles efetch_doc).to eq titles
       end
     end
 
     describe "::get_abstracts" do
       it "gets abstracts from the EUtils.fetch result" do
-        abstracts = [SpecConst::ABSTRACT_1, SpecConst::ABSTRACT_2]
+        abstracts = [SpecConst::ABSTRACT_1,
+                     SpecConst::ABSTRACT_2,
+                     SpecConst::ABSTRACT_3]
         expect(EUtils.get_abstracts efetch_doc).to eq abstracts
       end
     end
 
     describe "::get_pub_dates" do
       it "gets pub_dates from the EUtils.fetch result" do
-        pub_dates = %w[2007 1976]
+        pub_dates = %w[2007 1975 2013]
         expect(EUtils.get_pub_dates efetch_doc).to eq pub_dates
       end
     end

@@ -22,7 +22,7 @@ module PubMedApps
 
   # Provides methods for getting related pubmed citations.
   class Pmid
-    attr_accessor :pmid, :score
+    attr_accessor :pmid, :score, :abstract, :title, :pub_date
 
     def initialize(pmid)
       if pmid.match /[0-9]+/
@@ -54,7 +54,28 @@ module PubMedApps
       end
       pmids
     end
-    
+
+    def add_titles pmids, titles
+      pmids.zip(titles).each do |pmid, title|
+        pmid.title = title
+      end
+      pmids
+    end
+
+    def add_abstracts pmids, abstracts
+      pmids.zip(abstracts).each do |pmid, abstract|
+        pmid.abstract = abstract
+      end
+      pmids
+    end
+
+    def add_pub_dates pmids, pub_dates
+      pmids.zip(pub_dates).each do |pmid, pub_date|
+        pmid.pub_date = pub_date
+      end
+      pmids
+    end
+
     # Returns an array of PMIDs related to the pmid attribute
     #
     # Only takes the PMIDs in the LinkSetDb that contians the LinkName
@@ -81,7 +102,16 @@ module PubMedApps
               "scraping xml")
       end
 
-      add_scores pmids, scores
+      # add the info from the EFetch for each pmid
+      efetch_doc = EUtils.fetch *pmids.map { |pmid| pmid.pmid }
+      titles = EUtils.get_titles efetch_doc
+      abstracts = EUtils.get_abstracts efetch_doc
+      pub_dates = EUtils.get_pub_dates efetch_doc
+
+      pmids = add_scores pmids, scores
+      pmids = add_titles pmids, titles
+      pmids = add_abstracts pmids, abstracts
+      add_pub_dates pmids, pub_dates
     end
   end
 end

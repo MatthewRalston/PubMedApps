@@ -90,26 +90,39 @@ module PubMedApps
 
     # Get abstracts of queres from the EFetch Nokogiri::XML::Document
     #
+    # @todo If an article doesn't have an abstract, returns "" for that
+    #   article. If an article has a compound abstract, eg Intro,
+    #   Methods, Results, ..., it collapses that into a single
+    #   paragraph.
+    #
     # @param doc [Nokogiri::XML::Document] a doc with the results from
     #   the EFetch call
     #
     # @return [Array<String>] an array of abstract strings
     def self.get_abstracts doc
-      selector = 'PubmedArticle > MedlineCitation > Article > ' +
-        'Abstract > AbstractText'
-      doc.css(selector).map { |elem| elem.text }
+      articles = doc.css('PubmedArticle > MedlineCitation > Article') 
+      articles.each_with_object(Array.new) do |article, abstracts|
+        abstract = article.css('Abstract > AbstractText').children
+        if abstract.count == 0 # article has no abstract
+          abstracts << ""
+        elsif abstract.count > 1 # article has compound abstrct
+          abstracts << abstract.map { |elem| elem.text }.join(' ')
+        else # article has simple abstract
+          abstracts << abstract.text
+        end
+      end
     end
 
-    # Get pub dates of queres from the EFetch Nokogiri::XML::Document
-    #
-    # @param doc [Nokogiri::XML::Document] a doc with the results from
-    #   the EFetch call
-    #
-    # @return [Array<String>] an array of pub date strings
-    def self.get_pub_dates doc
-      selector =
-        'PubmedArticle > MedlineCitation > Article PubDate > Year'
-      doc.css(selector).map { |elem| elem.text }
+      # Get pub dates of queres from the EFetch Nokogiri::XML::Document
+      #
+      # @param doc [Nokogiri::XML::Document] a doc with the results from
+      #   the EFetch call
+      #
+      # @return [Array<String>] an array of pub date strings
+      def self.get_pub_dates doc
+        selector =
+          'PubmedArticle > MedlineCitation > Article PubDate > Year'
+        doc.css(selector).map { |elem| elem.text }
+      end
     end
   end
-end

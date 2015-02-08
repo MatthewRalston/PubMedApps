@@ -59,6 +59,18 @@ module PubMedApps
       it "adds the score to the related Pmid objects" do
         expect(pmid.related_pmids.map { |id| id.score } ).to eq SpecConst::SCORES
       end
+
+      it "adds the title to the related Pmid objects" do
+        expect(pmid.related_pmids.map { |id| id.title } ).to eq SpecConst::TITLES
+      end
+
+      it "adds the abstract to the related Pmid objects" do
+        expect(pmid.related_pmids.map { |id| id.abstract } ).to eq SpecConst::ABSTRACTS
+      end
+
+      it "adds the pub_date to the related Pmid objects" do
+        expect(pmid.related_pmids.map { |id| id.pub_date } ).to eq SpecConst::PUB_DATES
+      end
     end
   end
 end
