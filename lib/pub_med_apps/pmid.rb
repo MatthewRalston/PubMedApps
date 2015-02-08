@@ -22,34 +22,113 @@ module PubMedApps
 
   # Provides methods for getting related pubmed citations.
   class Pmid
+    attr_accessor :pmid, :score
 
-    # Return an array of PMIDs related to the given PMID
-    #
-    # @param pmid [String] the PMID of article to get related
-    #   citations
-    #
-    # @return [Array<String>] an array of string PMIDs
-    def self.related_citations pmid
-      xml_doc = Pmid.elink pmid
-      xml_doc.css('LinkSetDb Id').map { |elem| elem.text }.uniq
+    def initialize(pmid)
+      if pmid.match /[0-9]+/
+      @pmid = pmid
+      else
+        err_msg = "#{pmid} is not a proper PMID"
+        raise ArgumentError, err_msg
+      end
+
+      @score = 0
     end
 
-    # Return Nokogiri::XML::Document with citations related to given
+    # Only fetch the related pmids if they are needed.
+    #
+    # The first call to related_pmids stores the array in the instance
+    # variable, and all subsequent calls just return that value.
+    #
+    # @return [Array<Pmid>] an array of related PMIDs
+    def related_pmids
+      @related_pmids ||= fetch_related_pmids
+    end
+
+    # Return Nokogiri::XML::Document with pmids related to given
     # PMID
     #
+    # @todo Sleeps for one second to avoid NCBI eutils limits. Find a
+    #   better way.
+    #
     # @param pmid [String] the PMID of article to get related
-    #   citations
+    #   pmids
     # 
     # @return [Nokogiri::XML::Document] a Nokogiri::XML::Document with
-    #   the related citations to the given PMID
+    #   the related pmids to the given PMID
     def self.elink pmid
       unless pmid.match /[0-9]+/
         err_msg = "#{pmid} is not a proper PMID"
         raise ArgumentError, err_msg
       end
+
+      sleep 1
       uri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi" +
         "?dbfrom=pubmed&db=pubmed&cmd=neighbor_score&id=#{pmid}"
       Nokogiri::XML(open(uri)) { |config| config.strict.nonet }
     end
+
+    # Use EFetch to get author, abstract, etc for each PMID given
+    #
+    # @todo Sleeps for one second to avoid NCBI eutils limits. Find a
+    #   better way.
+    #
+    # @param *pmids [String, ...] as many PMIDs as you like
+    #
+    # @return [Nokogiri::XML::Document] a Nokogiri::XML::Document with
+    #   the info for given PMIDs
+    def self.fetch *pmids
+      pmids.each do |pmid|
+        unless pmid.match /[0-9]+/
+          err_msg = "#{pmid} is not a proper PMID"
+          raise ArgumentError, err_msg
+        end
+      end
+
+      sleep 1
+      uri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi" +
+        "?db=pubmed&retmode=xml&rettype=abstract&id=#{pmids.join(',')}"
+      Nokogiri::XML(open(uri)) { |config| config.strict.nonet }
+    end
+
+    private
+
+    def add_scores pmids, scores
+      pmids.zip(scores).each do |pmid, score|
+        pmid.score = score
+      end
+      pmids
+    end
+    
+    # Returns an array of PMIDs related to the pmid attribute
+    #
+    # Only takes the PMIDs in the LinkSetDb that contians the LinkName
+    #   with pubmed_pubmed
+    #
+    # @TODO instead of using .first, could this be done with xpath?
+    #
+    # @return [Array<Pmid>] an array of string PMIDs
+    def fetch_related_pmids
+      doc = Pmid.elink @pmid
+      pm_pm = doc.css('LinkSetDb').first
+      name = pm_pm.at('LinkName').text
+      
+      unless  name == 'pubmed_pubmed'
+        abort("ERROR: We got #{name}. Should've been pubmed_pubmed. " +
+              "Possibly bad xml file.")
+      end
+
+      pmids = pm_pm.css('Link Id').map { |elem| Pmid.new elem.text }
+      scores = pm_pm.css('Link Score').map { |elem| elem.text }
+
+      unless pmids.count == scores.count
+        abort("ERROR: different number of PMIDs and scores when " +
+              "scraping xml")
+      end
+
+      add_scores pmids, scores
+    end
   end
 end
+
+
