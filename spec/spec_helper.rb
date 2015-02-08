@@ -22,7 +22,13 @@ Coveralls.wear!
 require 'pub_med_apps'
 require 'nokogiri'
 
-module SpecConstants
+module SpecConst
+  attr_accessor :FAKE_XML, :PMID, :PMIDS, :SCORES
+
+  PMID = '25313075'
+  PMIDS = %w[23391036 15]
+  SCORES = %w[46386839 46086339]
+
 
   FAKE_XML =
     Nokogiri::XML '<?xml version="1.0"?>
@@ -114,8 +120,5 @@ module SpecConstants
 </eLinkResult>
 '
 
-  def self.FAKE_XML
-    FAKE_XML
-  end
 end
 

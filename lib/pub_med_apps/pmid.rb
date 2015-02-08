@@ -26,7 +26,7 @@ module PubMedApps
 
     def initialize(pmid)
       if pmid.match /[0-9]+/
-      @pmid = pmid
+        @pmid = pmid
       else
         err_msg = "#{pmid} is not a proper PMID"
         raise ArgumentError, err_msg
@@ -45,51 +45,6 @@ module PubMedApps
       @related_pmids ||= fetch_related_pmids
     end
 
-    # Return Nokogiri::XML::Document with pmids related to given
-    # PMID
-    #
-    # @todo Sleeps for one second to avoid NCBI eutils limits. Find a
-    #   better way.
-    #
-    # @param pmid [String] the PMID of article to get related
-    #   pmids
-    # 
-    # @return [Nokogiri::XML::Document] a Nokogiri::XML::Document with
-    #   the related pmids to the given PMID
-    def self.elink pmid
-      unless pmid.match /[0-9]+/
-        err_msg = "#{pmid} is not a proper PMID"
-        raise ArgumentError, err_msg
-      end
-
-      sleep 1
-      uri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi" +
-        "?dbfrom=pubmed&db=pubmed&cmd=neighbor_score&id=#{pmid}"
-      Nokogiri::XML(open(uri)) { |config| config.strict.nonet }
-    end
-
-    # Use EFetch to get author, abstract, etc for each PMID given
-    #
-    # @todo Sleeps for one second to avoid NCBI eutils limits. Find a
-    #   better way.
-    #
-    # @param *pmids [String, ...] as many PMIDs as you like
-    #
-    # @return [Nokogiri::XML::Document] a Nokogiri::XML::Document with
-    #   the info for given PMIDs
-    def self.fetch *pmids
-      pmids.each do |pmid|
-        unless pmid.match /[0-9]+/
-          err_msg = "#{pmid} is not a proper PMID"
-          raise ArgumentError, err_msg
-        end
-      end
-
-      sleep 1
-      uri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi" +
-        "?db=pubmed&retmode=xml&rettype=abstract&id=#{pmids.join(',')}"
-      Nokogiri::XML(open(uri)) { |config| config.strict.nonet }
-    end
 
     private
 
@@ -109,7 +64,7 @@ module PubMedApps
     #
     # @return [Array<Pmid>] an array of string PMIDs
     def fetch_related_pmids
-      doc = Pmid.elink @pmid
+      doc = EUtils.elink @pmid
       pm_pm = doc.css('LinkSetDb').first
       name = pm_pm.at('LinkName').text
       
@@ -130,5 +85,3 @@ module PubMedApps
     end
   end
 end
-
-
