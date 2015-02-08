@@ -19,6 +19,9 @@
 module PubMedApps
   # Provides methods for interfacing with NCBI's EUtils service
   class EUtils
+    BASE_URL = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+    APP_INFO = "email=moorer@udel.edu&tool=PubMedApps"
+    
     # Return Nokogiri::XML::Document with pmids related to given
     # PMID
     #
@@ -37,8 +40,8 @@ module PubMedApps
       end
 
       sleep 1
-      uri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi" +
-        "?dbfrom=pubmed&db=pubmed&cmd=neighbor_score&id=#{pmid}"
+      uri = "#{BASE_URL}/elink.fcgi?#{APP_INFO}" <<
+        "&dbfrom=pubmed&db=pubmed&cmd=neighbor_score&id=#{pmid}"
       Nokogiri::XML(open(uri)) { |config| config.strict.nonet }
     end
 
@@ -51,7 +54,7 @@ module PubMedApps
     #
     # @return [Nokogiri::XML::Document] a Nokogiri::XML::Document with
     #   the info for given PMIDs
-    def self.fetch *pmids
+    def self.efetch *pmids
       pmids.each do |pmid|
         unless pmid.match /[0-9]+/
           err_msg = "#{pmid} is not a proper PMID"
@@ -60,8 +63,8 @@ module PubMedApps
       end
 
       sleep 1
-      uri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi" +
-        "?db=pubmed&retmode=xml&rettype=abstract&id=#{pmids.join(',')}"
+      uri = "#{BASE_URL}/efetch.fcgi?#{APP_INFO}" <<
+        "&db=pubmed&retmode=xml&rettype=abstract&id=#{pmids.join(',')}"
       Nokogiri::XML(open(uri)) { |config| config.strict.nonet }
     end
 

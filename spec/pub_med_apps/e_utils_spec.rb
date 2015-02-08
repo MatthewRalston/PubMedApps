@@ -24,7 +24,7 @@ module PubMedApps
   describe EUtils do
 
     let(:efetch_doc) do
-      doc = EUtils.fetch(*SpecConst::PMIDS)
+      doc = EUtils.efetch(*SpecConst::PMIDS)
     end
     
     describe "::elink" do
@@ -42,14 +42,14 @@ module PubMedApps
 
     describe "::fetch" do
       it "returns EFetch info for given PMID" do
-        doc = EUtils.fetch SpecConst::PMID
+        doc = EUtils.efetch SpecConst::PMID
         expect(doc).to be_an_instance_of Nokogiri::XML::Document
       end
 
       it "can accept multiple pmids per query" do
         id1 = '23391036'
         id2 = '21143941'
-        expect(EUtils.fetch(id1, id2).css('PubmedArticle').count).to eq 2
+        expect(EUtils.efetch(id1, id2).css('PubmedArticle').count).to eq 2
       end
 
       it "raises an ArgumentError if not passed a proper PMID" do
@@ -58,34 +58,34 @@ module PubMedApps
         bad_pmid = 'fahehe'
         err_msg = "#{bad_pmid} is not a proper PMID"
         expect {
-          EUtils.fetch id1, bad_pmid, id2
+          EUtils.efetch id1, bad_pmid, id2
         }.to raise_error(ArgumentError, err_msg)
       end
     end
 
     describe "::get_pmids" do
-      it "gets pmids from the EUtils.fetch result" do
+      it "gets pmids from the EUtils.efetch result" do
         pmids = SpecConst::PMIDS
         expect(EUtils.get_pmids efetch_doc).to eq pmids
       end
     end
 
     describe "::get_titles" do
-      it "gets titles from the EUtils.fetch result" do
+      it "gets titles from the EUtils.efetch result" do
         titles = SpecConst::TITLES
         expect(EUtils.get_titles efetch_doc).to eq titles
       end
     end
 
     describe "::get_abstracts" do
-      it "gets abstracts from the EUtils.fetch result" do
+      it "gets abstracts from the EUtils.efetch result" do
         abstracts = SpecConst::ABSTRACTS
         expect(EUtils.get_abstracts efetch_doc).to eq abstracts
       end
     end
 
     describe "::get_pub_dates" do
-      it "gets pub_dates from the EUtils.fetch result" do
+      it "gets pub_dates from the EUtils.efetch result" do
         pub_dates = SpecConst::PUB_DATES
         expect(EUtils.get_pub_dates efetch_doc).to eq pub_dates
       end

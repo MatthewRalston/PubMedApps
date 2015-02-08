@@ -103,7 +103,7 @@ module PubMedApps
       end
 
       # add the info from the EFetch for each pmid
-      efetch_doc = EUtils.fetch *pmids.map { |pmid| pmid.pmid }
+      efetch_doc = EUtils.efetch *pmids.map { |pmid| pmid.pmid }
       titles = EUtils.get_titles efetch_doc
       abstracts = EUtils.get_abstracts efetch_doc
       pub_dates = EUtils.get_pub_dates efetch_doc
