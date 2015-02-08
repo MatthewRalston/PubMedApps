@@ -17,11 +17,17 @@
 # along with PubMedApps.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'spec_helper'
+require 'nokogiri'
 
 module PubMedApps
   describe Pmid do
 
     let(:pmid) { Pmid.new(SpecConst::PMID) }
+    let(:xml_doc) do
+      dir = File.dirname(__FILE__)
+      fname = 'test.xml'
+      Nokogiri:: XML open File.join(dir, '..', 'test_files', fname)
+    end
 
     describe "#new" do
       it "raises an ArgumentError if not passed a PMID (integer)" do
@@ -39,7 +45,7 @@ module PubMedApps
 
     describe "#related_pmids" do
       before(:each) do
-        allow(EUtils).to receive_messages :elink => SpecConst::FAKE_XML
+        allow(EUtils).to receive_messages :elink => xml_doc
       end
       
       it "returns an array with related pmids" do

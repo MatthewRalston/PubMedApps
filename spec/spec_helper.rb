@@ -20,105 +20,12 @@ require 'coveralls'
 Coveralls.wear!
 
 require 'pub_med_apps'
-require 'nokogiri'
 
 module SpecConst
-  attr_accessor :FAKE_XML, :PMID, :PMIDS, :SCORES
+  attr_accessor :PMID, :PMIDS, :SCORES
 
   PMID = '25313075'
   PMIDS = %w[23391036 15]
   SCORES = %w[46386839 46086339]
-
-
-  FAKE_XML =
-    Nokogiri::XML '<?xml version="1.0"?>
-<!DOCTYPE eLinkResult PUBLIC "-//NLM//DTD eLinkResult, 23 November 2010//EN" "http://www.ncbi.nlm.nih.gov/entrez/query/DTD/eLink_101123.dtd">
-<eLinkResult>
-
-	<LinkSet>
-		<DbFrom>pubmed</DbFrom>
-		<IdList>
-			<Id>25313075</Id>
-		</IdList>
-		<LinkSetDb>
-			<DbTo>pubmed</DbTo>
-			<LinkName>pubmed_pubmed</LinkName>
-			
-				<Link>
-				<Id>23391036</Id>
-				<Score>46386839</Score>
-			</Link>
-				<Link>
-				<Id>15</Id>
-				<Score>46086339</Score>
-			</Link>
-			
-		</LinkSetDb>
-		
-		
-		
-		<LinkSetDb>
-			<DbTo>pubmed</DbTo>
-			<LinkName>pubmed_pubmed_combined</LinkName>
-			
-				<Link>
-				<Id>23391036</Id>
-				<Score>46386839</Score>
-			</Link>
-			
-		</LinkSetDb>
-		<LinkSetDb>
-			<DbTo>pubmed</DbTo>
-			<LinkName>pubmed_pubmed_five</LinkName>
-			
-				<Link>
-				<Id>23391036</Id>
-				<Score>46386839</Score>
-			</Link>
-			
-		</LinkSetDb>
-		
-		<LinkSetDb>
-			<DbTo>pubmed</DbTo>
-			<LinkName>pubmed_pubmed_refs</LinkName>
-			
-				<Link>
-				<Id>25002514</Id>
-				<Score>25002514</Score>
-			</Link>
-				<Link>
-				<Id>235528</Id>
-				<Score>235528</Score>
-			</Link>
-			
-		</LinkSetDb>
-		<LinkSetDb>
-			<DbTo>pubmed</DbTo>
-			<LinkName>pubmed_pubmed_reviews</LinkName>
-			
-				<Link>
-				<Id>24809024</Id>
-				<Score>24464268</Score>
-			</Link>
-				<Link>
-				<Id>20858168</Id>
-				<Score>16953735</Score>
-			</Link>
-			
-		</LinkSetDb>
-		<LinkSetDb>
-			<DbTo>pubmed</DbTo>
-			<LinkName>pubmed_pubmed_reviews_five</LinkName>
-			
-				<Link>
-				<Id>24809024</Id>
-				<Score>24464268</Score>
-			</Link>
-			
-		</LinkSetDb>
-	</LinkSet>
-</eLinkResult>
-'
-
 end
 
