@@ -90,5 +90,18 @@ module PubMedApps
         expect(EUtils.get_pub_dates efetch_doc).to eq pub_dates
       end
     end
+
+    describe "::wait" do
+      it "prevents too many EUtils requests" do
+        id = '23391036'
+        start_time = Time.now
+        9.times do
+          EUtils.elink id
+        end
+        end_time = Time.now
+        expected_duration = 3
+        expect(end_time - start_time).to be >= expected_duration
+      end
+    end
   end
 end

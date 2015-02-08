@@ -20,16 +20,27 @@ module PubMedApps
   # Provides methods for interfacing with NCBI's EUtils service
   class EUtils
     BASE_URL = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+
+    # @note NCBI requires email and app name from those using the
+    #   EUtilities service
     APP_INFO = "email=moorer@udel.edu&tool=PubMedApps"
+    
+    # @todo NCBI says 3 request per second, but when i make it 0.33,
+    #   my ::wait spec fails
+    WAIT_TIME = 0.365 
+
+    # A mutex for locking
+    @@lock ||= Mutex.new
+
+    @@last_fetch_time = nil
     
     # Return Nokogiri::XML::Document with pmids related to given
     # PMID
     #
-    # @todo Sleeps for one second to avoid NCBI eutils limits. Find a
-    #   better way.
-    #
     # @param pmid [String] the PMID of article to get related
     #   pmids
+    #
+    # @raise [ArgumentError] if passed an improper PMID
     # 
     # @return [Nokogiri::XML::Document] a Nokogiri::XML::Document with
     #   the related pmids to the given PMID
@@ -39,7 +50,7 @@ module PubMedApps
         raise ArgumentError, err_msg
       end
 
-      sleep 1
+      EUtils.wait
       uri = "#{BASE_URL}/elink.fcgi?#{APP_INFO}" <<
         "&dbfrom=pubmed&db=pubmed&cmd=neighbor_score&id=#{pmid}"
       Nokogiri::XML(open(uri)) { |config| config.strict.nonet }
@@ -47,11 +58,10 @@ module PubMedApps
 
     # Use EFetch to get author, abstract, etc for each PMID given
     #
-    # @todo Sleeps for one second to avoid NCBI eutils limits. Find a
-    #   better way.
-    #
     # @param *pmids [String, ...] as many PMIDs as you like
     #
+    # @raise [ArgumentError] if passed an improper PMID
+    # 
     # @return [Nokogiri::XML::Document] a Nokogiri::XML::Document with
     #   the info for given PMIDs
     def self.efetch *pmids
@@ -62,7 +72,7 @@ module PubMedApps
         end
       end
 
-      sleep 1
+      EUtils.wait
       uri = "#{BASE_URL}/efetch.fcgi?#{APP_INFO}" <<
         "&db=pubmed&retmode=xml&rettype=abstract&id=#{pmids.join(',')}"
       Nokogiri::XML(open(uri)) { |config| config.strict.nonet }
@@ -74,7 +84,7 @@ module PubMedApps
     #   the EFetch call
     #
     # @return [Array<String>] an array of PMID strings
-    def self.get_pmids doc
+    def EUtils.get_pmids doc
       selector = 'PubmedArticle > MedlineCitation > PMID'
       doc.css(selector).map { |elem| elem.text }
     end
@@ -119,16 +129,34 @@ module PubMedApps
       end
     end
 
-      # Get pub dates of queres from the EFetch Nokogiri::XML::Document
-      #
-      # @param doc [Nokogiri::XML::Document] a doc with the results from
-      #   the EFetch call
-      #
-      # @return [Array<String>] an array of pub date strings
-      def self.get_pub_dates doc
-        selector =
-          'PubmedArticle > MedlineCitation > Article PubDate > Year'
-        doc.css(selector).map { |elem| elem.text }
+    # Get pub dates of queres from the EFetch Nokogiri::XML::Document
+    #
+    # @param doc [Nokogiri::XML::Document] a doc with the results from
+    #   the EFetch call
+    #
+    # @return [Array<String>] an array of pub date strings
+    def self.get_pub_dates doc
+      selector =
+        'PubmedArticle > MedlineCitation > Article PubDate > Year'
+      doc.css(selector).map { |elem| elem.text }
+    end
+
+    # Waits the alloted time set by NCBI if necessary.
+    #
+    # Similar to the BioRuby ncbi_access_wait method.
+    #
+    # @todo Since EUtils is never instantiated, if the code won't be
+    #   threaded, do I need the Mutex?
+    def self.wait
+      @@lock.synchronize do
+        if @@last_fetch_time
+          time_since_last_fetch = Time.now - @@last_fetch_time
+          if time_since_last_fetch < WAIT_TIME
+            sleep WAIT_TIME - time_since_last_fetch
+          end
+        end
+        @@last_fetch_time = Time.now
       end
     end
   end
+end

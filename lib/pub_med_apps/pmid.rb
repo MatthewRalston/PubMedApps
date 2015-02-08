@@ -24,6 +24,7 @@ module PubMedApps
   class Pmid
     attr_accessor :pmid, :score, :abstract, :title, :pub_date
 
+    # @raise [ArgumentError] if passed improper PMID
     def initialize(pmid)
       if pmid.match /[0-9]+/
         @pmid = pmid
