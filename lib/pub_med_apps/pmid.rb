@@ -60,7 +60,7 @@ module PubMedApps
     # Only takes the PMIDs in the LinkSetDb that contians the LinkName
     #   with pubmed_pubmed
     #
-    # @TODO instead of using .first, could this be done with xpath?
+    # @todo instead of using .first, could this be done with xpath?
     #
     # @return [Array<Pmid>] an array of string PMIDs
     def fetch_related_pmids

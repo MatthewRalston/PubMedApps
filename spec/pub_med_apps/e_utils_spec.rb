@@ -20,8 +20,15 @@ require 'spec_helper'
 require 'nokogiri'
 
 module PubMedApps
+
   describe EUtils do
 
+    let(:efetch_doc) do
+      id1 = '17284678'
+      id2 = '9997'
+      doc = EUtils.fetch(id1, id2)
+    end
+    
     describe "::elink" do
       it "takes a PMID and returns an xml object describing the matches" do
         doc = EUtils.elink SpecConst::PMID
@@ -55,6 +62,34 @@ module PubMedApps
         expect {
           EUtils.fetch id1, bad_pmid, id2
         }.to raise_error(ArgumentError, err_msg)
+      end
+    end
+
+    describe "::get_pmids" do
+      it "gets pmids from the EUtils.fetch result" do
+        pmids = %w[17284678 9997]
+        expect(EUtils.get_pmids efetch_doc).to eq pmids
+      end
+    end
+
+    describe "::get_titles" do
+      it "gets titles from the EUtils.fetch result" do
+        titles = [SpecConst::TITLE_1, SpecConst::TITLE_2]
+        expect(EUtils.get_titles efetch_doc).to eq titles
+      end
+    end
+
+    describe "::get_abstracts" do
+      it "gets abstracts from the EUtils.fetch result" do
+        abstracts = [SpecConst::ABSTRACT_1, SpecConst::ABSTRACT_2]
+        expect(EUtils.get_abstracts efetch_doc).to eq abstracts
+      end
+    end
+
+    describe "::get_pub_dates" do
+      it "gets pub_dates from the EUtils.fetch result" do
+        pub_dates = %w[2007 1976]
+        expect(EUtils.get_pub_dates efetch_doc).to eq pub_dates
       end
     end
   end

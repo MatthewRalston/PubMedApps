@@ -17,6 +17,7 @@
 # along with PubMedApps.  If not, see <http://www.gnu.org/licenses/>.
 
 module PubMedApps
+  # Provides methods for interfacing with NCBI's EUtils service
   class EUtils
     # Return Nokogiri::XML::Document with pmids related to given
     # PMID
@@ -64,28 +65,51 @@ module PubMedApps
       Nokogiri::XML(open(uri)) { |config| config.strict.nonet }
     end
 
-    def get_pmids doc
+    # Get PMIDs of queres from the EFetch Nokogiri::XML::Document
+    #
+    # @param doc [Nokogiri::XML::Document] a doc with the results from
+    #   the EFetch call
+    #
+    # @return [Array<String>] an array of PMID strings
+    def self.get_pmids doc
       selector = 'PubmedArticle > MedlineCitation > PMID'
       doc.css(selector).map { |elem| elem.text }
     end
 
-    def get_titles doc
+    # Get titles of queres from the EFetch Nokogiri::XML::Document
+    #
+    # @param doc [Nokogiri::XML::Document] a doc with the results from
+    #   the EFetch call
+    #
+    # @return [Array<String>] an array of title strings
+    def self.get_titles doc
       selector =
         'PubmedArticle > MedlineCitation > Article > ArticleTitle'
       doc.css(selector).map { |elem| elem.text }
     end
 
-    def get_abstracts doc
+    # Get abstracts of queres from the EFetch Nokogiri::XML::Document
+    #
+    # @param doc [Nokogiri::XML::Document] a doc with the results from
+    #   the EFetch call
+    #
+    # @return [Array<String>] an array of abstract strings
+    def self.get_abstracts doc
       selector = 'PubmedArticle > MedlineCitation > Article > ' +
         'Abstract > AbstractText'
       doc.css(selector).map { |elem| elem.text }
     end
 
-    def get_pub_dates
+    # Get pub dates of queres from the EFetch Nokogiri::XML::Document
+    #
+    # @param doc [Nokogiri::XML::Document] a doc with the results from
+    #   the EFetch call
+    #
+    # @return [Array<String>] an array of pub date strings
+    def self.get_pub_dates doc
       selector =
         'PubmedArticle > MedlineCitation > Article PubDate > Year'
       doc.css(selector).map { |elem| elem.text }
     end
-
   end
 end
