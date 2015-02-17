@@ -22,7 +22,7 @@ require 'nokogiri'
 module PubMedApps
   describe Pmid do
 
-    let(:pmid) { Pmid.new(SpecConst::PMID) }
+    let(:pmid) { Pmid.new SpecConst::PMIDS.first }
     let(:xml_doc) do
       dir = File.dirname(__FILE__)
       fname = 'test.xml'
@@ -42,13 +42,44 @@ module PubMedApps
         expect { Pmid.new bad_pmid }.to raise_error(ArgumentError, err_msg)
       end
     end
-    
-    describe "#pmid" do
-      it "returns the original pmid" do
-        expect(pmid.pmid).to eq SpecConst::PMID
+
+    context "after calling #get_info" do
+      before :all do
+        @pmid = Pmid.new SpecConst::PMIDS.first
+        @pmid.get_info
+      end
+      
+      describe "#pmid" do
+        it "returns the original pmid" do
+          expect(@pmid.pmid).to eq SpecConst::PMIDS.first
+        end
+      end
+
+      describe "#abstract" do
+        it "returns the original abstract" do
+          expect(@pmid.abstract).to eq SpecConst::ABSTRACTS.first
+        end
+      end      
+
+      describe "#pub_date" do
+        it "returns the original pub_date" do
+          expect(@pmid.pub_date).to eq SpecConst::PUB_DATES.first
+        end
+      end      
+
+      describe "#score" do
+        it "returns the original score" do
+          expect(@pmid.score).to eq 0
+        end
+      end      
+
+      describe "#title" do
+        it "returns the original title" do
+          expect(@pmid.title).to eq SpecConst::TITLES.first
+        end
       end
     end
-
+    
     describe "#related_pmids" do
       before(:each) do
         allow(EUtils).to receive_messages :elink => xml_doc
@@ -76,6 +107,10 @@ module PubMedApps
 
       it "adds the pub_date to the related Pmid objects" do
         expect(pmid.related_pmids.map { |id| id.pub_date } ).to eq SpecConst::PUB_DATES
+      end
+
+      it "returns an empty array if there are no related pmids" do
+        skip "Need to figure out eutils XML format when no related PMIDs"
       end
     end
   end

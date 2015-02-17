@@ -56,7 +56,9 @@ module PubMedApps
       Nokogiri::XML(open(uri)) { |config| config.strict.nonet }
     end
 
-    # Use EFetch to get author, abstract, etc for each PMID given
+    # Use EFetch to get author, abstract, etc for each PMID given.
+    #
+    # @note This methods pings NCBI eutils once.
     #
     # @param *pmids [String, ...] as many PMIDs as you like
     #
@@ -79,6 +81,8 @@ module PubMedApps
     end
 
     # Get PMIDs of queres from the EFetch Nokogiri::XML::Document
+    #
+    # @note This methods pings NCBI eutils once.
     #
     # @param doc [Nokogiri::XML::Document] a doc with the results from
     #   the EFetch call

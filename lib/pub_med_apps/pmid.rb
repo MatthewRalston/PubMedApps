@@ -25,6 +25,8 @@ module PubMedApps
     attr_accessor :pmid, :score, :abstract, :title, :pub_date
 
     # @raise [ArgumentError] if passed improper PMID
+    #
+    # @raise [ArgumentError] if not passed a String
     def initialize(pmid)
       unless pmid.kind_of? String
         raise ArgumentError, "PubMedApps::Pmid.new requires a String"
@@ -50,7 +52,20 @@ module PubMedApps
       @related_pmids ||= fetch_related_pmids
     end
 
-
+    # Gets the title, abstract and pub_date from EUtils.
+    #
+    # To avoid the EUtils overhead, call this only for the very first
+    # Pmid given by the user. The info for the related PMIDs will be
+    # propagated by the #related_pmids method.
+    #
+    # @note This methods pings NCBI eutils once.
+    def get_info
+      efetch_doc = EUtils.efetch @pmid
+      @title = EUtils.get_titles(efetch_doc).first
+      @abstract = EUtils.get_abstracts(efetch_doc).first
+      @pub_date = EUtils.get_pub_dates(efetch_doc).first      
+    end
+    
     private
 
     def add_scores pmids, scores
@@ -86,6 +101,8 @@ module PubMedApps
     # Only takes the PMIDs in the LinkSetDb that contians the LinkName
     #   with pubmed_pubmed
     #
+    # @note This methods pings NCBI eutils twice.
+    #
     # @todo instead of using .first, could this be done with xpath?
     #
     # @return [Array<Pmid>] an array of string PMIDs
@@ -108,7 +125,8 @@ module PubMedApps
       end
 
       # add the info from the EFetch for each pmid
-      efetch_doc = EUtils.efetch *pmids.map { |pmid| pmid.pmid }
+      related_pmids = pmids.map { |pmid| pmid.pmid }
+      efetch_doc = EUtils.efetch *related_pmids
       titles = EUtils.get_titles efetch_doc
       abstracts = EUtils.get_abstracts efetch_doc
       pub_dates = EUtils.get_pub_dates efetch_doc
