@@ -26,6 +26,10 @@ module PubMedApps
 
     # @raise [ArgumentError] if passed improper PMID
     def initialize(pmid)
+      unless pmid.kind_of? String
+        raise ArgumentError, "PubMedApps::Pmid.new requires a String"
+      end
+      
       if pmid.match /[0-9]+/
         @pmid = pmid
       else

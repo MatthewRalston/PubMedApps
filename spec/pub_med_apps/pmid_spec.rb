@@ -30,9 +30,15 @@ module PubMedApps
     end
 
     describe "#new" do
-      it "raises an ArgumentError if not passed a PMID (integer)" do
+      it "raises an ArgumentError if not passed a PMID" do
         bad_pmid = 'fahehe'
         err_msg = "#{bad_pmid} is not a proper PMID"
+        expect { Pmid.new bad_pmid }.to raise_error(ArgumentError, err_msg)
+      end
+      
+      it "raises an ArgumentError if not passed a string" do
+        bad_pmid = 17284678
+        err_msg = "PubMedApps::Pmid.new requires a String"
         expect { Pmid.new bad_pmid }.to raise_error(ArgumentError, err_msg)
       end
     end
