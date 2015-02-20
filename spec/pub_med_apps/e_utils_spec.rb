@@ -28,7 +28,7 @@ module PubMedApps
     end
     
     describe "::elink" do
-      it "takes a PMID and returns an xml object describing the matches" do
+      it "takes PMID and returns an xml object describing matches" do
         doc = EUtils.elink SpecConst::PMID
         expect(doc).to be_an_instance_of Nokogiri::XML::Document
       end
@@ -36,7 +36,8 @@ module PubMedApps
       it "raises an ArgumentError if not passed a proper PMID" do
         bad_pmid = 'fahehe'
         err_msg = "#{bad_pmid} is not a proper PMID"
-        expect { EUtils.elink bad_pmid }.to raise_error(ArgumentError, err_msg)
+        expect { EUtils.elink bad_pmid }.to raise_error(ArgumentError,
+                                                        err_msg)
       end
     end
 
@@ -49,7 +50,8 @@ module PubMedApps
       it "can accept multiple pmids per query" do
         id1 = '23391036'
         id2 = '21143941'
-        expect(EUtils.efetch(id1, id2).css('PubmedArticle').count).to eq 2
+        the_count = EUtils.efetch(id1, id2).css('PubmedArticle').count
+        expect(the_count).to eq 2
       end
 
       it "raises an ArgumentError if not passed a proper PMID" do

@@ -21,7 +21,7 @@ require 'open-uri'
 module PubMedApps
 
   # Provides methods for getting related pubmed citations.
-  class Pmid
+  class Citation
     attr_accessor :pmid, :score, :abstract, :title, :pub_date
 
     # @raise [ArgumentError] if passed improper PMID
@@ -29,7 +29,8 @@ module PubMedApps
     # @raise [ArgumentError] if not passed a String
     def initialize(pmid)
       unless pmid.kind_of? String
-        raise ArgumentError, "PubMedApps::Pmid.new requires a String"
+        raise(ArgumentError,
+              "PubMedApps::Citation.new requires a String")
       end
       
       if pmid.match /[0-9]+/
@@ -42,21 +43,22 @@ module PubMedApps
       @score = 0
     end
 
-    # Only fetch the related pmids if they are needed.
+    # Only fetch the related citations if they are needed.
     #
-    # The first call to related_pmids stores the array in the instance
-    # variable, and all subsequent calls just return that value.
+    # The first call to related_citations stores the array in the
+    # instance variable, and all subsequent calls just return that
+    # value.
     #
-    # @return [Array<Pmid>] an array of related PMIDs
-    def related_pmids
-      @related_pmids ||= fetch_related_pmids
+    # @return [Array<Citation>] an array of related Citations
+    def related_citations
+      @related_citations ||= fetch_related_citations
     end
 
     # Gets the title, abstract and pub_date from EUtils.
     #
     # To avoid the EUtils overhead, call this only for the very first
-    # Pmid given by the user. The info for the related PMIDs will be
-    # propagated by the #related_pmids method.
+    # Citation given by the user. The info for the related PMIDs will
+    # be propagated by the #related_citations method.
     #
     # @note This methods pings NCBI eutils once.
     def get_info
@@ -68,35 +70,35 @@ module PubMedApps
     
     private
 
-    def add_scores pmids, scores
-      pmids.zip(scores).each do |pmid, score|
-        pmid.score = score
+    def add_scores citations, scores
+      citations.zip(scores).each do |citation, score|
+        citation.score = score
       end
-      pmids
+      citations
     end
 
-    def add_titles pmids, titles
-      pmids.zip(titles).each do |pmid, title|
-        pmid.title = title
+    def add_titles citations, titles
+      citations.zip(titles).each do |citation, title|
+        citation.title = title
       end
-      pmids
+      citations
     end
 
-    def add_abstracts pmids, abstracts
-      pmids.zip(abstracts).each do |pmid, abstract|
-        pmid.abstract = abstract
+    def add_abstracts citations, abstracts
+      citations.zip(abstracts).each do |citation, abstract|
+        citation.abstract = abstract
       end
-      pmids
+      citations
     end
 
-    def add_pub_dates pmids, pub_dates
-      pmids.zip(pub_dates).each do |pmid, pub_date|
-        pmid.pub_date = pub_date
+    def add_pub_dates citations, pub_dates
+      citations.zip(pub_dates).each do |citation, pub_date|
+        citation.pub_date = pub_date
       end
-      pmids
+      citations
     end
 
-    # Returns an array of PMIDs related to the pmid attribute
+    # Returns an array of Citations related to the pmid attribute
     #
     # Only takes the PMIDs in the LinkSetDb that contians the LinkName
     #   with pubmed_pubmed
@@ -105,8 +107,10 @@ module PubMedApps
     #
     # @todo instead of using .first, could this be done with xpath?
     #
-    # @return [Array<Pmid>] an array of string PMIDs
-    def fetch_related_pmids
+    # @todo Clean up this method.
+    #
+    # @return [Array<Citation>] an array of Citations
+    def fetch_related_citations
       doc = EUtils.elink @pmid
       pm_pm = doc.css('LinkSetDb').first
       name = pm_pm.at('LinkName').text
@@ -116,25 +120,27 @@ module PubMedApps
               "Possibly bad xml file.")
       end
 
-      pmids = pm_pm.css('Link Id').map { |elem| Pmid.new elem.text }
+      citations = pm_pm.css('Link Id').map do |elem|
+        Citation.new elem.text
+      end
       scores = pm_pm.css('Link Score').map { |elem| elem.text }
 
-      unless pmids.count == scores.count
-        abort("ERROR: different number of PMIDs and scores when " +
+      unless citations.count == scores.count
+        abort("ERROR: different number of Citations and scores when " +
               "scraping xml")
       end
 
-      # add the info from the EFetch for each pmid
-      related_pmids = pmids.map { |pmid| pmid.pmid }
+      # add the info from the EFetch for each citation
+      related_pmids = citations.map { |citation| citation.pmid }
       efetch_doc = EUtils.efetch *related_pmids
       titles = EUtils.get_titles efetch_doc
       abstracts = EUtils.get_abstracts efetch_doc
       pub_dates = EUtils.get_pub_dates efetch_doc
 
-      pmids = add_scores pmids, scores
-      pmids = add_titles pmids, titles
-      pmids = add_abstracts pmids, abstracts
-      add_pub_dates pmids, pub_dates
+      citations = add_scores citations, scores
+      citations = add_titles citations, titles
+      citations = add_abstracts citations, abstracts
+      add_pub_dates citations, pub_dates
     end
   end
 end
