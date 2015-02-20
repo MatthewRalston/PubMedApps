@@ -41,7 +41,7 @@ module PubMedApps
       end
     end
 
-    describe "::fetch" do
+    describe "::efetch" do
       it "returns EFetch info for given PMID" do
         doc = EUtils.efetch SpecConst::PMID
         expect(doc).to be_an_instance_of Nokogiri::XML::Document
@@ -62,6 +62,12 @@ module PubMedApps
         expect {
           EUtils.efetch id1, bad_pmid, id2
         }.to raise_error(ArgumentError, err_msg)
+      end
+
+      it "handles OpenURI::HTTPError: 414 Request-URI Too Large" do
+        expect {
+          EUtils.efetch *SpecConst::RELATED_PMIDS
+        }.not_to raise_error
       end
     end
 

@@ -31,7 +31,7 @@ module PubMedApps
 
     describe "#new" do
       it "raises an ArgumentError if not passed a PMID" do
-        bad_pmid = 'fahehe'
+        bad_pmid = '456fahehe123'
         err_msg = "#{bad_pmid} is not a proper PMID"
         expect { Citation.new bad_pmid }.to raise_error(ArgumentError,
                                                         err_msg)
@@ -42,6 +42,11 @@ module PubMedApps
         err_msg = "PubMedApps::Citation.new requires a String"
         expect { Citation.new bad_pmid }.to raise_error(ArgumentError,
                                                         err_msg)
+      end
+
+      it "strips whitespace from sloppy user input" do
+        bad_pmid = " \t  17284678 \n   \t"
+        expect(Citation.new(bad_pmid).pmid).to eq '17284678'
       end
     end
 

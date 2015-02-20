@@ -32,8 +32,10 @@ module PubMedApps
         raise(ArgumentError,
               "PubMedApps::Citation.new requires a String")
       end
+
+      pmid.strip!
       
-      if pmid.match /[0-9]+/
+      if pmid.match /^[0-9]+$/
         @pmid = pmid
       else
         err_msg = "#{pmid} is not a proper PMID"

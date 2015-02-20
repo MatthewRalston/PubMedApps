@@ -27,7 +27,11 @@ module PubMedApps
     
     # @todo NCBI says 3 request per second, but when i make it 0.33,
     #   my ::wait spec fails
-    WAIT_TIME = 0.365 
+    WAIT_TIME = 0.365
+
+    # To avoid slow EFetch posts as well as avoid the URI too long
+    # error that occurs somewhere around 900 PMIDs
+    MAX_PMIDS = 100
 
     # A mutex for locking
     @@lock ||= Mutex.new
@@ -58,15 +62,26 @@ module PubMedApps
 
     # Use EFetch to get author, abstract, etc for each PMID given.
     #
+    # If there are > 100 PMIDs in your request, the method will only
+    # take the first 100 PMIDs.
+    #
+    # @note From some of my testing it appears that if you EFetch >=
+    # 900 PMIds, EUtils will not accept that URI. However, this could
+    # vary depending on the actual length of the URI and not simply
+    # the number of PMIDs that are posted.
+    #
+    # @todo Consider using WebEnv for large efetch requests.
+    #
     # @note This methods pings NCBI eutils once.
     #
     # @param *pmids [String, ...] as many PMIDs as you like
     #
     # @raise [ArgumentError] if passed an improper PMID
-    # 
+    #
     # @return [Nokogiri::XML::Document] a Nokogiri::XML::Document with
     #   the info for given PMIDs
     def self.efetch *pmids
+      pmids = pmids.take MAX_PMIDS
       pmids.each do |pmid|
         unless pmid.match /[0-9]+/
           err_msg = "#{pmid} is not a proper PMID"
