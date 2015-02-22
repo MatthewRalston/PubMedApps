@@ -123,9 +123,9 @@ module PubMedApps
     # Get abstracts of queres from the EFetch Nokogiri::XML::Document
     #
     # If an article doesn't have an abstract, returns "" for that
-    #   article. If an article has a compound abstract, eg Intro,
-    #   Methods, Results, ..., it collapses that into a single
-    #   paragraph.
+    # article. If an article has a compound abstract, eg Intro,
+    # Methods, Results, ..., it collapses that into a single
+    # paragraph.
     #
     # @todo Keep the compound abstract breakdown instead of collapsing
     #   it into a single paragraph.
