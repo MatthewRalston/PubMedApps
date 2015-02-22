@@ -26,7 +26,7 @@ module PubMedApps
     let(:xml_doc) do
       dir = File.dirname(__FILE__)
       fname = 'test.xml'
-      Nokogiri:: XML open File.join(dir, '..', 'test_files', fname)
+      Nokogiri::XML open File.join(dir, '..', 'test_files', fname)
     end
 
     describe "#new" do
@@ -46,7 +46,8 @@ module PubMedApps
 
       it "strips whitespace from sloppy user input" do
         bad_pmid = " \t  17284678 \n   \t"
-        expect(Citation.new(bad_pmid).pmid).to eq '17284678'
+        pmid = Citation.new(bad_pmid).pmid
+        expect(pmid).to eq '17284678'
       end
     end
 
