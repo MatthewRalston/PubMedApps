@@ -66,9 +66,9 @@ module PubMedApps
     # take the first 100 PMIDs.
     #
     # @note From some of my testing it appears that if you EFetch >=
-    # 900 PMIds, EUtils will not accept that URI. However, this could
-    # vary depending on the actual length of the URI and not simply
-    # the number of PMIDs that are posted.
+    #   900 PMIds, EUtils will not accept that URI. However, this
+    #   could vary depending on the actual length of the URI and not
+    #   simply the number of PMIDs that are posted.
     #
     # @todo Consider using WebEnv for large efetch requests.
     #

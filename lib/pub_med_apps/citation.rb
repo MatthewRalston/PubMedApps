@@ -72,6 +72,14 @@ module PubMedApps
     
     private
 
+    # citations is an array of Citaiton objects
+    #
+    # @todo Change array of objects in place?
+    #
+    # @param citations [Arrary<Citation>] An array of Citation objects
+    #
+    # @param scores [Array<String>] An array of strings with the
+    #   scores
     def add_scores citations, scores
       citations.zip(scores).each do |citation, score|
         citation.score = score
