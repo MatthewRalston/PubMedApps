@@ -160,6 +160,25 @@ module PubMedApps
       doc.css(selector).map { |elem| elem.text }
     end
 
+    # Get references of queres from the EFetch Nokogiri::XML::Document
+    #
+    # @todo I'm pretty sure this will only work they way it should if
+    #   you EFetch one document at a time. If your doc came from an
+    #   efetch that was passed lots of PMIDs, I don't think you'll be
+    #   able to tell which ones go with which.
+    #
+    # @param doc [Nokogiri::XML::Document] a doc with the results from
+    #   the EFetch call
+    #
+    # @return [Array<String>] an array of reference strings
+    def self.get_references doc
+      selector =
+        "PubmedArticle > MedlineCitation > CommentsCorrectionsList > " <<
+        "CommentsCorrections > PMID"
+      doc.css(selector).map { |elem| elem.text }
+    end
+
+    
     # Waits the alloted time set by NCBI if necessary.
     #
     # Similar to the BioRuby ncbi_access_wait method.

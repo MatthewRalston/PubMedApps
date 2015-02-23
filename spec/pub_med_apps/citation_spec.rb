@@ -86,6 +86,12 @@ module PubMedApps
           expect(@citation.title).to eq SpecConst::TITLES.first
         end
       end
+
+      describe "#references" do
+        it "returns an array of Citations that this Citation cites" do
+          expect(@citation.references). to eq SpecConst::REFERENCES.first
+        end
+      end
     end
     
     describe "#related_citations" do

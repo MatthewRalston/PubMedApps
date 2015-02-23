@@ -99,6 +99,13 @@ module PubMedApps
       end
     end
 
+    describe "::get_references" do
+      it "gets pub_dates from the EUtils.efetch result" do
+        skip("Haven't gotten all the citations from efetch_doc" <<
+             "\nAlmost positive this won't work properly")
+      end
+    end
+
     describe "::wait" do
       it "prevents too many EUtils requests" do
         id = '23391036'

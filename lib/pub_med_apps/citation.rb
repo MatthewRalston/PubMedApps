@@ -22,7 +22,7 @@ module PubMedApps
 
   # Provides methods for getting related pubmed citations.
   class Citation
-    attr_accessor :pmid, :score, :abstract, :title, :pub_date
+    attr_accessor :pmid, :score, :abstract, :title, :pub_date, :references
 
     # @raise [ArgumentError] if passed improper PMID
     #
@@ -67,7 +67,8 @@ module PubMedApps
       efetch_doc = EUtils.efetch @pmid
       @title = EUtils.get_titles(efetch_doc).first
       @abstract = EUtils.get_abstracts(efetch_doc).first
-      @pub_date = EUtils.get_pub_dates(efetch_doc).first      
+      @pub_date = EUtils.get_pub_dates(efetch_doc).first
+      @references = EUtils.get_references(efetch_doc)
     end
     
     private
