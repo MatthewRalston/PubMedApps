@@ -22,6 +22,22 @@ module PubMedApps
 
   # Provides methods for getting related pubmed citations.
   class Citation
+    # Normalizes scores on a scale of 0 to 1
+    #
+    # As a PubMedApps web designer
+    #   I would like to normalize scores
+    #   So that I can sane branch lengths in my PubMed Flower
+    #
+    # @param citations [Array<Citation>] an array of Citation
+    #   elements, likely the return value from a call to
+    #   #related_citations
+    #
+    # @return [Array<Float>] normalized scores
+    def self.normalize_scores citations
+      scores = citations.map { |citation| citation.score }
+      scores.map { |score| score / scores.max.to_f }
+    end
+    
     attr_accessor :pmid, :score, :abstract, :title, :pub_date, :references
 
     # @raise [ArgumentError] if passed improper PMID

@@ -29,6 +29,27 @@ module PubMedApps
       Nokogiri::XML open File.join(dir, '..', 'test_files', fname)
     end
 
+    describe "::normalize_scores" do
+      context "With an array containing Citation objects" do
+        it "rescales array of numbers on a scale of 0 to 1" do
+          citations = %w[15 16 17].map.with_index do |pmid, idx|
+            citation = Citation.new pmid
+            citation.score = idx
+            citation
+          end
+
+          normalized_scores = Citation.normalize_scores citations
+          expect(normalized_scores).to eq [0.0, 0.5, 1.0]
+        end
+      end
+
+      context "With an empty array" do
+        it "returns an empty array" do
+          expect(Citation.normalize_scores []).to eq []
+        end
+      end
+    end
+
     describe "#new" do
       it "raises an ArgumentError if not passed a PMID" do
         bad_pmid = '456fahehe123'
