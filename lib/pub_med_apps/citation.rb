@@ -64,11 +64,16 @@ module PubMedApps
     #
     # @note This methods pings NCBI eutils once.
     def get_info
-      efetch_doc = EUtils.efetch @pmid
-      @title = EUtils.get_titles(efetch_doc).first
-      @abstract = EUtils.get_abstracts(efetch_doc).first
-      @pub_date = EUtils.get_pub_dates(efetch_doc).first
-      @references = EUtils.get_references(efetch_doc)
+      begin
+        efetch_doc = EUtils.efetch @pmid
+        @title = EUtils.get_titles(efetch_doc).first
+        @abstract = EUtils.get_abstracts(efetch_doc).first
+        @pub_date = EUtils.get_pub_dates(efetch_doc).first
+        @references = EUtils.get_references(efetch_doc)
+      rescue OpenURI::HTTPError => e
+        @pmid, @title, @abstract, @pub_date, @references, @score = nil
+        @citations = nil
+      end
     end
     
     private
@@ -122,8 +127,17 @@ module PubMedApps
     #
     # @return [Array<Citation>] an array of Citations
     def fetch_related_citations
+      # @pmid will be nil if get_info was called and the PMID didn't
+      # have a matching UID in NCBI
+      return [] if @pmid.nil?
+      
       doc = EUtils.elink @pmid
       pm_pm = doc.css('LinkSetDb').first
+
+      # should be nil if there are no related citations OR get_info
+      # was NOT called and the PMID didn't have a matching UID in NCBI
+      return [] if pm_pm.nil?
+      
       name = pm_pm.at('LinkName').text
       
       unless  name == 'pubmed_pubmed'

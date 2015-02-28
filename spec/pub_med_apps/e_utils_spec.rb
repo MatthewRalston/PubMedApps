@@ -34,7 +34,7 @@ module PubMedApps
       end
 
       it "raises an ArgumentError if not passed a proper PMID" do
-        bad_pmid = 'fahehe'
+        bad_pmid = 'fahehe234'
         err_msg = "#{bad_pmid} is not a proper PMID"
         expect { EUtils.elink bad_pmid }.to raise_error(ArgumentError,
                                                         err_msg)

@@ -49,7 +49,7 @@ module PubMedApps
     # @return [Nokogiri::XML::Document] a Nokogiri::XML::Document with
     #   the related pmids to the given PMID
     def self.elink pmid
-      unless pmid.match /[0-9]+/
+      unless pmid.match /^[0-9]+$/
         err_msg = "#{pmid} is not a proper PMID"
         raise ArgumentError, err_msg
       end

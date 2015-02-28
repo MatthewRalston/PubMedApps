@@ -23,9 +23,9 @@ module PubMedApps
   describe Citation do
 
     let(:citation) { Citation.new SpecConst::PMIDS.first }
-    let(:xml_doc) do
+    let(:xml_no_links) do
       dir = File.dirname(__FILE__)
-      fname = 'test.xml'
+      fname = 'no_related_citations_elink.xml'
       Nokogiri::XML open File.join(dir, '..', 'test_files', fname)
     end
 
@@ -51,89 +51,163 @@ module PubMedApps
       end
     end
 
-    context "after calling #get_info" do
-      before :all do
-        @citation = Citation.new SpecConst::PMIDS.first
-        @citation.get_info
+    describe "#get_info" do
+      context "with a PMID that doesn't have a matching UID in NCBI" do
+        before :all do
+          @citation = Citation.new "0"
+        end
+
+        it "shouldn't raise OpenURI::HTTPError" do
+          expect { @citation.get_info }.not_to raise_error
+        end
+
+        it "sets @pmid to nil" do
+          expect(@citation.pmid).to be nil
+        end
+
+        it "sets @score to nil" do
+          expect(@citation.score).to be nil
+        end
+
+        it "sets @abstract to nil" do
+          expect(@citation.abstract).to be nil
+        end
+
+        it "sets @title to nil" do
+          expect(@citation.title).to be nil
+        end
+
+        it "sets @pub_date to nil" do
+          expect(@citation.pub_date).to be nil
+        end
+
+        it "sets @references to nil" do
+          expect(@citation.references).to be nil
+        end        
       end
       
-      describe "#pmid" do
-        it "returns the original pmid" do
-          expect(@citation.pmid).to eq SpecConst::PMIDS.first
+      context "after calling #get_info, let's spec the instance methods" do
+        before :all do
+          @citation = Citation.new SpecConst::PMIDS.first
+          @citation.get_info
         end
-      end
-
-      describe "#abstract" do
-        it "returns the original abstract" do
-          expect(@citation.abstract).to eq SpecConst::ABSTRACTS.first
+        
+        describe "#pmid" do
+          it "returns the original pmid" do
+            expect(@citation.pmid).to eq SpecConst::PMIDS.first
+          end
         end
-      end      
 
-      describe "#pub_date" do
-        it "returns the original pub_date" do
-          expect(@citation.pub_date).to eq SpecConst::PUB_DATES.first
+        describe "#abstract" do
+          it "returns the original abstract" do
+            expect(@citation.abstract).to eq SpecConst::ABSTRACTS.first
+          end
+        end      
+
+        describe "#pub_date" do
+          it "returns the original pub_date" do
+            expect(@citation.pub_date).to eq SpecConst::PUB_DATES.first
+          end
+        end      
+
+        describe "#score" do
+          it "returns the original score" do
+            expect(@citation.score).to eq 0
+          end
+        end      
+
+        describe "#title" do
+          it "returns the original title" do
+            expect(@citation.title).to eq SpecConst::TITLES.first
+          end
         end
-      end      
 
-      describe "#score" do
-        it "returns the original score" do
-          expect(@citation.score).to eq 0
-        end
-      end      
-
-      describe "#title" do
-        it "returns the original title" do
-          expect(@citation.title).to eq SpecConst::TITLES.first
-        end
-      end
-
-      describe "#references" do
-        it "returns an array of Citations that this Citation cites" do
-          expect(@citation.references). to eq SpecConst::REFERENCES.first
+        describe "#references" do
+          it "returns an array of Citations that this Citation cites" do
+            expect(@citation.references). to eq SpecConst::REFERENCES.first
+          end
         end
       end
     end
     
     describe "#related_citations" do
-      before(:each) do
-        allow(EUtils).to receive_messages :elink => xml_doc
-      end
-      
-      it "returns an array with related citations" do
-        pmids = citation.related_citations.map { |id| id.pmid }
-        expect(pmids).to eq SpecConst::PMIDS
-      end
-
-      it "the array is filled with Citations" do
-        all_citations = citation.related_citations.all? do |id|
-          id.instance_of? Citation
+      context "when @pmid is nil (No PMID found)" do
+        before :each do
+          @bad_citation = Citation.new "0"
         end
-        expect(all_citations).to be true
-      end
 
-      it "adds the score to the related Citation objects" do
-        scores = citation.related_citations.map { |id| id.score } 
-        expect(scores).to eq SpecConst::SCORES
-      end
+        context "when #get_info has already been called" do
+          it "returns an empty array" do
+            @bad_citation.get_info
+            expect(@bad_citation.related_citations).to eq []
+          end
+        end
 
-      it "adds the title to the related Citation objects" do
-        titles = citation.related_citations.map { |id| id.title } 
-        expect(titles).to eq SpecConst::TITLES
+        context "when #get_info hasn't already been called" do
+          it "returns an empty array" do
+            # the elink xml will look like xml_no_links
+            expect(@bad_citation.related_citations).to eq []
+          end
+        end
       end
+          
 
-      it "adds the abstract to the related Citation objects" do
-        abstracts = citation.related_citations.map { |id| id.abstract } 
-        expect(abstracts).to eq SpecConst::ABSTRACTS
-      end
+      context "when @pmid is not nil (ie the PMID is okay)" do
+        context "when the citation *does* have related citations" do
+          before :each do
+            dir = File.dirname(__FILE__)
+            fname = 'test.xml'
+            xml_with_links =
+              Nokogiri::XML open File.join(dir, '..', 'test_files',
+                                           fname)
 
-      it "adds the pub_date to the related Citation objects" do
-        pub_dates = citation.related_citations.map { |id| id.pub_date } 
-        expect(pub_dates).to eq SpecConst::PUB_DATES
-      end
+            allow(EUtils).to receive_messages :elink => xml_with_links
+            @related_citations = citation.related_citations
+          end
+          
+          it "returns an array with related citations" do
+            pmids = @related_citations.map { |id| id.pmid }
+            expect(pmids).to eq SpecConst::PMIDS
+          end
 
-      it "returns an empty array if there are no related citations" do
-        skip("Need to figure out eutils XML format when no related " <<
-             "Citations")
+          it "the array is filled with Citations" do
+            all_citations = @related_citations.all? do |id|
+              id.instance_of? Citation
+            end
+            expect(all_citations).to be true
+          end
+
+          it "adds the score to the related Citation objects" do
+            scores = @related_citations.map { |id| id.score } 
+            expect(scores).to eq SpecConst::SCORES
+          end
+
+          it "adds the title to the related Citation objects" do
+            titles = @related_citations.map { |id| id.title } 
+            expect(titles).to eq SpecConst::TITLES
+          end
+
+          it "adds the abstract to the related Citation objects" do
+            abstracts = @related_citations.map { |id| id.abstract } 
+            expect(abstracts).to eq SpecConst::ABSTRACTS
+          end
+
+          it "adds the pub_date to the related Citation objects" do
+            pub_dates = @related_citations.map { |id| id.pub_date } 
+            expect(pub_dates).to eq SpecConst::PUB_DATES
+          end
+
+        end
+
+        context "when the citation has *no* related citations" do
+          before(:each) do
+            allow(EUtils).to receive_messages :elink => xml_no_links
+          end
+
+          it "returns an empty array if there are no related citations" do
+            expect(citation.related_citations).to eq []
+          end
+        end
       end
     end
   end
