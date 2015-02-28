@@ -117,13 +117,13 @@ module PubMedApps
     # Returns an array of Citations related to the pmid attribute
     #
     # Only takes the PMIDs in the LinkSetDb that contians the LinkName
-    #   with pubmed_pubmed
+    #   with pubmed_pubmed. Will return an empty array if there are no
+    #   related citations, or if the @pmid doesn't have a matching UID
+    #   in NCBI.
     #
     # @note This methods pings NCBI eutils twice.
     #
     # @todo instead of using .first, could this be done with xpath?
-    #
-    # @todo Clean up this method.
     #
     # @return [Array<Citation>] an array of Citations
     def fetch_related_citations
@@ -145,17 +145,32 @@ module PubMedApps
               "Possibly bad xml file.")
       end
 
-      citations = pm_pm.css('Link Id').map do |elem|
-        Citation.new elem.text
-      end
-      scores = pm_pm.css('Link Score').map { |elem| elem.text }
+      citations = get_citations pm_pm
+      scores = get_scores pm_pm
 
       unless citations.count == scores.count
         abort("ERROR: different number of Citations and scores when " +
               "scraping xml")
       end
 
-      # add the info from the EFetch for each citation
+      populate_related_citations citations, scores
+    end
+
+    # Get the citations from the Nokogiri::XML
+    def get_citations pm_pm
+      pm_pm.css('Link Id').map do |elem|
+        Citation.new elem.text
+      end
+    end
+
+    # Get the scores from the Nokogiri::XML
+    def get_scores pm_pm
+      pm_pm.css('Link Score').map { |elem| elem.text }
+    end
+
+    # Add the info from the EFetch for each citation, eg title,
+    #   abstract, etc
+    def populate_related_citations citations, scores
       related_pmids = citations.map { |citation| citation.pmid }
       efetch_doc = EUtils.efetch *related_pmids
       titles = EUtils.get_titles efetch_doc
@@ -165,7 +180,9 @@ module PubMedApps
       citations = add_scores citations, scores
       citations = add_titles citations, titles
       citations = add_abstracts citations, abstracts
-      add_pub_dates citations, pub_dates
+      citations = add_pub_dates citations, pub_dates
+
+      citations
     end
   end
 end
