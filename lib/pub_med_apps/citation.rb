@@ -17,8 +17,23 @@
 # along with PubMedApps.  If not, see <http://www.gnu.org/licenses/>.
 
 require 'open-uri'
+require 'json'
+
+
 
 module PubMedApps
+  # Modifies string class for json validation
+  class JsonString < String
+    # Validates if string is json formatted
+    #
+    def is_json?
+      begin
+        !!JSON.parse(self)
+      rescue
+        false
+      end
+    end
+  end
 
   # Provides methods for getting related pubmed citations.
   class Citation
@@ -70,6 +85,41 @@ module PubMedApps
     # @return [Array<Citation>] an array of related Citations
     def related_citations
       @related_citations ||= fetch_related_citations
+    end
+
+    # Convert related citations into json format
+    #
+    # First, verifies that the @related_citations is instantiated
+    # Second, checks that all @related_citations are Citations
+    # Then converts query node and @related_citations to json
+    # 
+    #
+    # @param query [Citation] query node
+    # @param citations [Array<Citation>] related Citations
+    # @return [String] a json-format string of related citations
+    def to_json
+      citations = if @related_citations
+                    @related_citations
+                  else
+                    self.related_citations
+                  end
+
+      all_citations = citations.all? do |rec|
+        rec.instance_of? Citation
+      end unless citations.empty?
+
+      nodes = [{:PMID=>@pmid}.to_json]
+      links = []
+
+      if all_citations
+        citations.each_with_index do |rec,i|
+          nodes << {:PMID=>rec.pmid}.to_json
+          links << {:source=>0,
+            :target=>i+1,
+            :value=>rec.score}.to_json
+        end
+      end
+      JsonString.new("{\"nodes\":[#{nodes.join(',')}],\"links\":[#{links.join(',')}]}")
     end
 
     # Gets the title, abstract and pub_date from EUtils.

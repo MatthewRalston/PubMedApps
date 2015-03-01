@@ -1,0 +1,11 @@
+{
+  "nodes":[
+     {"PMID":12345},
+     {"PMID":12346},
+     {"PMID":12347}
+ ],
+  "links":[
+   {"source":1,"target":0,"value":20},
+   {"source":1,"target":2,"value":40}
+ ]
+}
