@@ -20,31 +20,6 @@ require 'spec_helper'
 require 'nokogiri'
 
 module PubMedApps
-  describe JsonString do
-    dir = File.dirname(__FILE__)
-    testfile = "test.json"
-    badfile = "bad.json"
-    let(:json) {
-      File.open(File.join(dir, '..', 'test_files', testfile)){|x|
-        JsonString.new(x.read.gsub(/\s+/,''))
-      }
-    }
-    let(:badjson) {
-      File.open(File.join(dir, '..', 'test_files', badfile)){|x|
-        JsonString.new(x.read.gsub(/\s+/,''))
-      }
-    }
-
-    describe "#is_json?" do
-      it "returns true for properly formatted json strings" do
-        expect(json.is_json?).to be true
-      end
-      it "returns false for malformed json or non-json strings" do
-        expect(badjson.is_json?).to be false
-      end
-    end
-  end
-
   describe Citation do
 
     let(:citation) { Citation.new SpecConst::PMIDS.first }
@@ -56,15 +31,24 @@ module PubMedApps
 
     describe "::normalize_scores" do
       context "With an array containing Citation objects" do
-        it "rescales array of numbers on a scale of 0 to 1" do
-          citations = %w[15 16 17].map.with_index do |pmid, idx|
+        before(:each) do
+          @citations = %w[15 16 17].map.with_index do |pmid, idx|
             citation = Citation.new pmid
             citation.score = idx
             citation
           end
-
-          normalized_scores = Citation.normalize_scores citations
+        end
+        it "rescales array of numbers on a scale of 0 to 1" do
+          normalized_scores = Citation.normalize_scores(@citations).
+            map{|citation| citation.score}
           expect(normalized_scores).to eq [0.0, 0.5, 1.0]
+        end
+
+        it "returns an array of citation objects" do
+          all_citations = @citations.all? do |citation|
+            citation.instance_of? Citation
+          end
+          expect(all_citations).to be true
         end
       end
 
@@ -263,8 +247,8 @@ module PubMedApps
           allow(EUtils).to receive_messages :elink => xml_no_links
         end
         
-        it "returns a json string" do
-          expect(citation.to_json.is_json?).to be true
+        it "returns a properly formatted json string" do
+          expect{JSON.parse citation.to_json}.to_not raise_error
         end
         
         it "returns only the query node" do
@@ -283,9 +267,8 @@ module PubMedApps
         
           allow(EUtils).to receive_messages :elink => xml_with_links
         end
-        
-        it "returns a json string" do
-          expect(citation.to_json.is_json?).to be true
+        it "returns a properly formatted json string" do
+          expect{JSON.parse citation.to_json}.to_not raise_error
         end
       end
     end

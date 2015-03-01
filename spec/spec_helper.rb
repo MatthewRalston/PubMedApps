@@ -26,7 +26,7 @@ module SpecConst
 
   PMID = '25313075'
   PMIDS = %w[17284678 15 23391036]
-  SCORES = %w[46386839 36386839 26086339]
+  SCORES = [46386839, 36386839, 26086339]
 
   TITLE_1 = "Sequencing and analysis of chromosome 1 of Eimeria tenella reveals a unique segmental organization."
 

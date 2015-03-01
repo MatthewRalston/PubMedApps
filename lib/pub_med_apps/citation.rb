@@ -22,18 +22,6 @@ require 'json'
 
 
 module PubMedApps
-  # Modifies string class for json validation
-  class JsonString < String
-    # Validates if string is json formatted
-    #
-    def is_json?
-      begin
-        !!JSON.parse(self)
-      rescue
-        false
-      end
-    end
-  end
 
   # Provides methods for getting related pubmed citations.
   class Citation
@@ -47,10 +35,13 @@ module PubMedApps
     #   elements, likely the return value from a call to
     #   #related_citations
     #
-    # @return [Array<Float>] normalized scores
+    # @return [Array<Citation>] normalized scores
     def self.normalize_scores citations
       scores = citations.map { |citation| citation.score }
-      scores.map { |score| score / scores.max.to_f }
+      citations.each do |citation|
+        citation.score = citation.score / scores.max.to_f
+      end
+      citations
     end
     
     attr_accessor :pmid, :score, :abstract, :title, :pub_date, :references
@@ -96,22 +87,14 @@ module PubMedApps
     #
     # @param query [Citation] query node
     # @param citations [Array<Citation>] related Citations
-    # @return [String] a json-format string of related citations
+    # @return [JsonString] json formatted related citations
     def to_json
-      citations = if @related_citations
-                    @related_citations
-                  else
-                    self.related_citations
-                  end
-
-      all_citations = citations.all? do |rec|
-        rec.instance_of? Citation
-      end unless citations.empty?
+      citations = Citation.normalize_scores self.related_citations
 
       nodes = [{:PMID=>@pmid}.to_json]
       links = []
 
-      if all_citations
+      unless citations.empty?
         citations.each_with_index do |rec,i|
           nodes << {:PMID=>rec.pmid}.to_json
           links << {:source=>0,
@@ -119,7 +102,7 @@ module PubMedApps
             :value=>rec.score}.to_json
         end
       end
-      JsonString.new("{\"nodes\":[#{nodes.join(',')}],\"links\":[#{links.join(',')}]}")
+      "{\"nodes\":[#{nodes.join(',')}],\"links\":[#{links.join(',')}]}"
     end
 
     # Gets the title, abstract and pub_date from EUtils.
@@ -231,7 +214,7 @@ module PubMedApps
 
     # Get the scores from the Nokogiri::XML
     def get_scores pm_pm
-      pm_pm.css('Link Score').map { |elem| elem.text }
+      pm_pm.css('Link Score').map { |elem| elem.text.to_i }
     end
 
     # Add the info from the EFetch for each citation, eg title,
