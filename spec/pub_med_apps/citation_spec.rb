@@ -29,32 +29,44 @@ module PubMedApps
       Nokogiri::XML open File.join(dir, '..', 'test_files', fname)
     end
 
-    describe "::normalize_scores" do
-      context "With an array containing Citation objects" do
+    describe "::normalize" do
+      context "when the query *does* have related citations" do
         before(:each) do
-          @citations = %w[15 16 17].map.with_index do |pmid, idx|
-            citation = Citation.new pmid
-            citation.score = idx
-            citation
-          end
-        end
-        it "rescales array of numbers on a scale of 0 to 1" do
-          normalized_scores = Citation.normalize_scores(@citations).
-            map{|citation| citation.score}
-          expect(normalized_scores).to eq [0.0, 0.5, 1.0]
+          # resets the scores of 100 related citations to 1...100
+          @citation = Citation.new SpecConst::PMIDS.first
+          @related_citations = @citation.related_citations
+          @related_citations.each_with_index {|related,i| related.score = i+1}
         end
 
-        it "returns an array of citation objects" do
-          all_citations = @citations.all? do |citation|
-            citation.instance_of? Citation
-          end
-          expect(all_citations).to be true
+        it "rescales scores on a scale of 0 to 1" do
+          @citation.normalize
+          normalized_scores = @related_citations.
+            map{|related| related.normalized_score}
+          decimals=(1..100).to_a.map{|x| (x.to_f/100)}
+          expect(normalized_scores).to eq(decimals)
+        end
+
+        it "does not over-normalize citation scores" do
+          @citation.normalize
+          norm_scores = @citation.related_citations.
+            map{|related| related.normalized_score}
+          @citation.normalize
+          twicenorm_scores = @citation.related_citations.
+            map{|related| related.normalized_score}
+          expect(twicenorm_scores).to eq(norm_scores)
         end
       end
-
-      context "With an empty array" do
-        it "returns an empty array" do
-          expect(Citation.normalize_scores []).to eq []
+      context "when the query *doesn't* have related citations" do
+        it "does not raise an error" do
+          dir = File.dirname(__FILE__)
+          fname = 'test.xml'
+          xml_with_links =
+            Nokogiri::XML open File.join(dir, '..', 'test_files',
+                                         fname)
+        
+          allow(EUtils).to receive_messages :elink => xml_with_links
+          citation.related_citations
+          expect{citation.normalize}.to_not raise_error
         end
       end
     end
@@ -242,18 +254,24 @@ module PubMedApps
     end
 
     describe "#to_json" do
-      context "when the query has *no* related citations" do
+      context "when the query *doesn't* have related citations" do
         before(:each) do
           allow(EUtils).to receive_messages :elink => xml_no_links
+          @queryjson=citation.to_json
         end
         
         it "returns a properly formatted json string" do
-          expect{JSON.parse citation.to_json}.to_not raise_error
+          expect{JSON.parse @queryjson}.to_not raise_error
+        end
+
+        it "returns only the query node" do
+          expect(@queryjson).
+            to include "\"nodes\":[{\"PMID\":\"#{SpecConst::PMIDS.first}\"}]"
         end
         
-        it "returns only the query node" do
-          queryjson=citation.to_json
-          expect(queryjson).to include "\"links\":[]}"
+        it "does not return any links" do
+          parsed = JSON.parse @queryjson
+          expect(parsed["links"]).to be_empty
         end
       end
 
@@ -266,9 +284,25 @@ module PubMedApps
                                          fname)
         
           allow(EUtils).to receive_messages :elink => xml_with_links
+          @queryjson=citation.to_json
         end
         it "returns a properly formatted json string" do
-          expect{JSON.parse citation.to_json}.to_not raise_error
+          expect{JSON.parse @queryjson}.to_not raise_error
+        end
+
+        it "returns a json containing an array of nodes" do
+          parsed = JSON.parse @queryjson
+          expect(parsed["nodes"]).to_not be_empty
+        end
+
+        it "returns a json containing the query node" do
+          expect(@queryjson).
+            to include "\"nodes\":[{\"PMID\":\"#{SpecConst::PMIDS.first}\"}"
+        end
+        
+        it "returns a json containing an array of links" do
+          parsed = JSON.parse @queryjson
+          expect(parsed["links"]).to_not be_empty
         end
       end
     end

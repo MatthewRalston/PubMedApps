@@ -36,15 +36,15 @@ module PubMedApps
     #   #related_citations
     #
     # @return [Array<Citation>] normalized scores
-    def self.normalize_scores citations
-      scores = citations.map { |citation| citation.score }
-      citations.each do |citation|
-        citation.score = citation.score / scores.max.to_f
+    def normalize
+      scores = @related_citations.map { |citation| citation.score }
+      @related_citations.each do |citation|
+        citation.normalized_score = citation.score / scores.max.to_f
       end
-      citations
     end
     
-    attr_accessor :pmid, :score, :abstract, :title, :pub_date, :references
+    attr_accessor :pmid, :score, :abstract, :title, :pub_date, :references,
+    :normalized_score
 
     # @raise [ArgumentError] if passed improper PMID
     #
@@ -65,6 +65,7 @@ module PubMedApps
       end
 
       @score = 0
+      @normalized_score = 0
     end
 
     # Only fetch the related citations if they are needed.
@@ -85,12 +86,11 @@ module PubMedApps
     # Then converts query node and @related_citations to json
     # 
     #
-    # @param query [Citation] query node
-    # @param citations [Array<Citation>] related Citations
     # @return [JsonString] json formatted related citations
     def to_json
-      citations = Citation.normalize_scores self.related_citations
-
+      related_citations
+      normalize
+      citations=@related_citations
       nodes = [{:PMID=>@pmid}.to_json]
       links = []
 
