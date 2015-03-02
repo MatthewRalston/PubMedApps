@@ -37,10 +37,11 @@ module PubMedApps
     #
     # @return [Array<Citation>] normalized scores
     def normalize
-      scores = @related_citations.map { |citation| citation.score }
+      scores = related_citations.map { |citation| citation.score }
       @related_citations.each do |citation|
         citation.normalized_score = citation.score / scores.max.to_f
       end
+      @related_citations
     end
     
     attr_accessor :pmid, :score, :abstract, :title, :pub_date, :references,
@@ -99,7 +100,7 @@ module PubMedApps
           nodes << {:PMID=>rec.pmid}.to_json
           links << {:source=>0,
             :target=>i+1,
-            :value=>rec.score}.to_json
+            :value=>rec.normalized_score}.to_json
         end
       end
       "{\"nodes\":[#{nodes.join(',')}],\"links\":[#{links.join(',')}]}"

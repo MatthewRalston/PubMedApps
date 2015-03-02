@@ -45,28 +45,12 @@ module PubMedApps
           decimals=(1..100).to_a.map{|x| (x.to_f/100)}
           expect(normalized_scores).to eq(decimals)
         end
-
-        it "does not over-normalize citation scores" do
-          @citation.normalize
-          norm_scores = @citation.related_citations.
-            map{|related| related.normalized_score}
-          @citation.normalize
-          twicenorm_scores = @citation.related_citations.
-            map{|related| related.normalized_score}
-          expect(twicenorm_scores).to eq(norm_scores)
-        end
       end
       context "when the query *doesn't* have related citations" do
-        it "does not raise an error" do
-          dir = File.dirname(__FILE__)
-          fname = 'test.xml'
-          xml_with_links =
-            Nokogiri::XML open File.join(dir, '..', 'test_files',
-                                         fname)
-        
-          allow(EUtils).to receive_messages :elink => xml_with_links
-          citation.related_citations
-          expect{citation.normalize}.to_not raise_error
+        it "returns an empty array" do
+          allow(EUtils).to receive_messages :elink => xml_no_links
+          scores = citation.normalize
+          expect(scores).to be_empty
         end
       end
     end
