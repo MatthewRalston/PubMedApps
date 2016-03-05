@@ -43,7 +43,7 @@ module PubMedApps
           normalized_scores = @related_citations.
             map{|related| related.normalized_score}
           decimals=(1..100).to_a.map{|x| (x.to_f/100)}
-          expect(normalized_scores).to eq(decimals)
+          expect(normalized_scores).to match_array decimals
         end
       end
       context "when the query *doesn't* have related citations" do

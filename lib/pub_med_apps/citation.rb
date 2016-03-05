@@ -39,7 +39,7 @@ module PubMedApps
     def normalize
       scores = related_citations.map { |citation| citation.score }
       @related_citations.each do |citation|
-        citation.normalized_score = citation.score / scores.max.to_f
+        citation.normalized_score = (citation.score / scores.max.to_f).round(2)
       end
       @related_citations
     end
